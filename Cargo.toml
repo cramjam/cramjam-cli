@@ -14,3 +14,9 @@ blosc2-shared = ["libcramjam/blosc2-shared"]
 clap = { version = "^4.2", features = ["derive"] }
 bytesize = "^1"
 libcramjam = { version = "^0.4" }
+
+[profile.release]
+strip = true
+lto = "fat"
+codegen-units = 1
+opt-level = 3
