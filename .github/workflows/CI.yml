@@ -126,9 +126,6 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew install ninja
-          rustup target add aarch64-apple-darwin
-          rustup target add x86_64-apple-darwin
-
           echo "MACOSX_DEPLOYMENT_TARGET=10.12" >> $GITHUB_ENV
 
       - name: Setup (Windows)
@@ -137,7 +134,6 @@ jobs:
           BLOSC2_INSTALL_PREFIX: ${{ github.workspace }}/blosc2
         run: |
           choco install ninja cmake
-          rustup target add i686-pc-windows-msvc
 
       - name: Setup (Linux)
         if: runner.os == 'Linux'
