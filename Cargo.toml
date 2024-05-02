@@ -13,7 +13,7 @@ blosc2-shared = ["libcramjam/blosc2-shared"]
 [dependencies]
 clap = { version = "^4.2", features = ["derive"] }
 bytesize = "^1"
-libcramjam = { git = "https://github.com/cramjam/libcramjam.git", branch = "update-blosc2-feats" }
+libcramjam = { version = "0.4.2" }
 
 [profile.release]
 strip = true
