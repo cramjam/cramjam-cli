@@ -5,7 +5,7 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
-default = ["blosc2-shared", "blosc2-static"]
+default = ["blosc2-static"]
 use-system-blosc2 = ["libcramjam/use-system-blosc2"]
 blosc2-static = ["libcramjam/blosc2-static"]
 blosc2-shared = ["libcramjam/blosc2-shared"]
@@ -13,7 +13,7 @@ blosc2-shared = ["libcramjam/blosc2-shared"]
 [dependencies]
 clap = { version = "^4.2", features = ["derive"] }
 bytesize = "^1"
-libcramjam = { version = "^0.4" }
+libcramjam = { git = "https://github.com/cramjam/libcramjam.git", branch = "update-blosc2-feats" }
 
 [profile.release]
 strip = true
