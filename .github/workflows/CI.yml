@@ -20,7 +20,7 @@ jobs:
     runs-on: ${{ matrix.conf.os }}
     name: ${{ matrix.conf.os }}-${{ matrix.conf.target }}-${{ matrix.python-version }}-${{ matrix.conf.python-architecture }}-${{ matrix.conf.manylinux }}
     strategy:
-      fail-fast: ${{ !( startsWith(github.ref, 'refs/heads/master') || startsWith(github.ref, 'refs/tags/') ) }}
+      fail-fast: ${{ !( startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/tags/') ) }}
       matrix:
         python-version: 
           - '3.8' 
@@ -130,8 +130,6 @@ jobs:
 
       - name: Setup (Windows)
         if: runner.os == 'Windows'
-        env:
-          BLOSC2_INSTALL_PREFIX: ${{ github.workspace }}/blosc2
         run: |
           choco install ninja cmake
 
@@ -268,7 +266,7 @@ jobs:
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
-        if: ${{ ( startsWith(github.ref, 'refs/heads/master') || startsWith(github.ref, 'refs/tags/') ) }}
+        if: ${{ ( startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/tags/') ) }}
         with:
           name: dist
           path: dist
@@ -307,11 +305,13 @@ jobs:
     - uses: actions/download-artifact@v3
       with:
         name: dist
+    - name: List artifacts
+      run: ls -lhs
     - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         skip-existing: true
-        packages-dir: dist/
+        packages-dir: ./
 
   gh-publish:
     name: Publish artifacts to GH
@@ -324,7 +324,9 @@ jobs:
     - uses: actions/download-artifact@v3
       with:
         name: dist
+    - name: List artifacts
+      run: ls -lhs
     - name: Upload to GitHub
       uses: softprops/action-gh-release@v2
       with:
-        files: dist/*
+        files: ./*
