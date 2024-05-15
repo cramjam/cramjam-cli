@@ -26,6 +26,7 @@ Available algorithms:
 - [X] gzip
 - [X] deflate
 - [X] zstd
+- [X] blosc2
 
 All available for use as:
 
