@@ -31,12 +31,12 @@ def test_cli_file_to_file(data, variant):
 
         compressed_file = pathlib.Path(tmpdir).joinpath(f"input.txt.{variant}")
 
-        cmd = f"cramjam-cli {variant} compress --input {infile} --output {compressed_file}"
+        cmd = f"cramjam-cli {variant} compress --input {infile} --output {compressed_file} --nbytes {len(data)}"
         run_command(cmd)
 
         decompressed_file = pathlib.Path(tmpdir).joinpath("decompressed.txt")
         run_command(
-            f"cramjam-cli {variant} decompress --input {compressed_file} --output {decompressed_file} --nbytes {len(data)}"
+            f"cramjam-cli {variant} decompress --input {compressed_file} --output {decompressed_file}"
         )
         assert data == decompressed_file.read_bytes()
 
@@ -48,12 +48,9 @@ def test_cli_file_to_stdout(data, variant):
         infile = pathlib.Path(tmpdir).joinpath("input.txt")
         infile.write_bytes(data)
 
-        cmd = f"cramjam-cli {variant} compress --input {infile}"
-        run_command(cmd)
+        cmd = f"cramjam-cli {variant} compress --input {infile} --nbytes {len(data)}"
+        compressed = run_command(cmd)
 
-        compressed = pathlib.Path(tmpdir).joinpath(f"compressed.txt.{variant}")
-        compressed.write_bytes(expected)
-
-        cmd = f"cramjam-cli {variant} decompress --input {compressed} --nbytes {len(data)}"
-        out = run_command(cmd)
-        assert out == data
+        cmd = f"cramjam-cli {variant} decompress --input {compressed}"
+        decompressed = run_command(cmd)
+        assert decompressed == data
