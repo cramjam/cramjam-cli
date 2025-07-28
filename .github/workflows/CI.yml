@@ -144,7 +144,7 @@ jobs:
           python -m pip install .[dev] --pre --find-links dist --force-reinstall
           python -m pip install cramjam-cli --pre --no-index --find-links dist --force-reinstall
 
-          python -m pytest -vs
+          python -m pytest -vs ./tests
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
