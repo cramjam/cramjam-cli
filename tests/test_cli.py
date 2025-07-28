@@ -7,6 +7,8 @@ from datetime import timedelta
 import pytest
 from hypothesis import strategies as st, given, settings
 
+import cramjam
+
 VARIANTS = ("snappy", "brotli", "bzip2", "lz4", "gzip", "deflate", "zstd")
 
 # Some OS can be slow or have higher variability in their runtimes on CI
@@ -48,9 +50,11 @@ def test_cli_file_to_stdout(data, variant):
         infile = pathlib.Path(tmpdir).joinpath("input.txt")
         infile.write_bytes(data)
 
-        cmd = f"cramjam-cli {variant} compress --input {infile} --nbytes {len(data)} > {infile}.{variant}"
-        run_command(cmd)
+        cmd = f"cramjam-cli {variant} compress --input {infile} --nbytes {len(data)}"
+        out = run_command(cmd)
+        outfile = pathlib.Path(tmpdir).joinpath(f"input.txt.{variant}")
+        outfile.write_bytes(out)
 
-        cmd = f"cat {infile}.{variant} | cramjam-cli {variant} decompress"
-        decompressed = run_command(cmd)
-        assert decompressed == data
+        cmd = f"cramjam-cli {variant} decompress --input {outfile}"
+        out = run_command(cmd)
+        assert out == data
