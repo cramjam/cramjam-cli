@@ -48,9 +48,9 @@ def test_cli_file_to_stdout(data, variant):
         infile = pathlib.Path(tmpdir).joinpath("input.txt")
         infile.write_bytes(data)
 
-        cmd = f"cramjam-cli {variant} compress --input {infile} --nbytes {len(data)}"
-        compressed = run_command(cmd)
+        cmd = f"cramjam-cli {variant} compress --input {infile} --nbytes {len(data)} > input.txt.{variant}"
+        run_command(cmd)
 
-        cmd = f"cramjam-cli {variant} decompress --input {compressed}"
+        cmd = f"cat input.txt.{variant} | cramjam-cli {variant} decompress"
         decompressed = run_command(cmd)
         assert decompressed == data
