@@ -1,8 +1,7 @@
 # cramjam-cli
 
-[![CI](https://github.com/milesgranger/pyrus-cramjam/workflows/CI/badge.svg?branch=master)](https://github.com/milesgranger/pyrus-cramjam/actions?query=branch=master)
+[![CI](https://github.com/cramjam/cramjam-cli/workflows/CI/badge.svg?branch=main)](https://github.com/cramjam/cramjam-cli/actions?query=branch=main)
 [![PyPI](https://img.shields.io/pypi/v/cramjam-cli.svg)](https://pypi.org/project/cramjam-cli)
-[![Anaconda-Server Badge](https://anaconda.org/conda-forge/cramjam-cli/badges/version.svg)](https://anaconda.org/conda-forge/cramjam-cli)
 [![Downloads](https://pepy.tech/badge/cramjam-cli/month)](https://pepy.tech/project/cramjam-cli)
 
 
@@ -26,7 +25,6 @@ Available algorithms:
 - [X] gzip
 - [X] deflate
 - [X] zstd
-- [X] blosc2
 
 All available for use as:
 

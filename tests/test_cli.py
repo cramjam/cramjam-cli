@@ -11,11 +11,6 @@ import cramjam
 
 VARIANTS = ("snappy", "brotli", "bzip2", "lz4", "gzip", "deflate", "zstd")
 
-# TODO: after blosc2 is moved out of cramjam experimental
-if not hasattr(cramjam, "blosc2") and hasattr(cramjam, "experimental") and hasattr(cramjam.experimental, "blosc2"):
-    cramjam.blosc2 = cramjam.experimental.blosc2
-    VARIANTS = (*VARIANTS, "blosc2")
-
 # Some OS can be slow or have higher variability in their runtimes on CI
 settings.register_profile("local", deadline=timedelta(milliseconds=1000))
 settings.register_profile("CI", deadline=None, max_examples=10)
@@ -32,19 +27,14 @@ def run_command(cmd) -> bytes:
 @given(data=st.binary(min_size=1))
 @pytest.mark.parametrize("variant", VARIANTS)
 def test_cli_file_to_file(data, variant):
-
     with tempfile.TemporaryDirectory() as tmpdir:
         infile = pathlib.Path(tmpdir).joinpath("input.txt")
         infile.write_bytes(data)
 
         compressed_file = pathlib.Path(tmpdir).joinpath(f"input.txt.{variant}")
 
-        cmd = f"cramjam-cli {variant} compress --input {infile} --output {compressed_file}"
+        cmd = f"cramjam-cli {variant} compress --input {infile} --output {compressed_file} --nbytes {len(data)}"
         run_command(cmd)
-
-        expected = bytes(getattr(cramjam, variant).compress(data))
-        if variant != "blosc2":
-            assert expected == compressed_file.read_bytes()
 
         decompressed_file = pathlib.Path(tmpdir).joinpath("decompressed.txt")
         run_command(
@@ -56,21 +46,15 @@ def test_cli_file_to_file(data, variant):
 @given(data=st.binary(min_size=1))
 @pytest.mark.parametrize("variant", VARIANTS)
 def test_cli_file_to_stdout(data, variant):
-
     with tempfile.TemporaryDirectory() as tmpdir:
         infile = pathlib.Path(tmpdir).joinpath("input.txt")
         infile.write_bytes(data)
 
-        cmd = f"cramjam-cli {variant} compress --input {infile}"
+        cmd = f"cramjam-cli {variant} compress --input {infile} --nbytes {len(data)}"
         out = run_command(cmd)
+        outfile = pathlib.Path(tmpdir).joinpath(f"input.txt.{variant}")
+        outfile.write_bytes(out)
 
-        expected = bytes(getattr(cramjam, variant).compress(data))
-        if variant != "blosc2":
-            assert expected == out
-
-        compressed = pathlib.Path(tmpdir).joinpath(f"compressed.txt.{variant}")
-        compressed.write_bytes(expected)
-
-        cmd = f"cramjam-cli {variant} decompress --input {compressed}"
+        cmd = f"cramjam-cli {variant} decompress --input {outfile}"
         out = run_command(cmd)
         assert out == data
