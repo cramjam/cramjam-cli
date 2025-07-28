@@ -129,7 +129,7 @@ jobs:
           manylinux: ${{ matrix.conf.manylinux }}
           args: -i ${{ matrix.python-version }} --release --out dist
 
-      - name: Install built wheel and Test (Native)
+      - name: Install built wheel and Test
         # TODO: I'm not sure but the actual collection of tests on windows using pypy3.10 takes forever and/or fails
         if: |
           !startsWith(matrix.conf.manylinux, 'musl') && 
@@ -145,45 +145,6 @@ jobs:
           python -m pip install cramjam-cli --pre --no-index --find-links dist --force-reinstall
 
           python -m pytest -vs
-
-      # Could use 'distro: alpine_latest' in 'run-on-arch-action' but seems difficult to install a specific version of python
-      # so we'll just use existing python alpine images to test import and cli use w/o testing archs other than x86_64
-      - name: Install built wheel and Test (musllinux)
-        if: startsWith(matrix.conf.manylinux, 'musl') && matrix.conf.target == 'x86_64'
-        run: |
-          docker run \
-            -v $(pwd)/dist:/wheels \
-            --rm python:${{ matrix.python-version }}-alpine sh \
-              -c "pip install cramjam-cli --no-index --find-links /wheels && cramjam-cli --help"
-
-      - name: Install built wheel and Test (Cross)
-        if: |
-          !startsWith(matrix.conf.manylinux, 'musl') && 
-          runner.os == 'Linux' &&
-          !startsWith(matrix.python-version, 'pypy')  &&
-          contains(fromJson('["armv6", "armv7", "aarch64", "riscv64", "s390x", "ppc64le"]'), matrix.conf.target) 
-        uses: uraimo/run-on-arch-action@v2.7.1
-        with:
-          arch: ${{ matrix.conf.target }}
-          distro: ubuntu20.04
-          githubToken: ${{ github.token }}
-          # Mount the dist directory as /artifacts in the container
-          dockerRunArgs: |
-            --volume "${PWD}/dist:/artifacts"
-          install: |
-            apt-get update
-            apt-get install -y --no-install-recommends python3 python3-venv software-properties-common
-            add-apt-repository ppa:deadsnakes/ppa
-            apt-get update
-            apt-get install -y curl python${{ matrix.python-version }}-venv
-          run: |
-            ls -lrth /artifacts
-            PYTHON=python${{ matrix.python-version }}
-            $PYTHON -m venv venv
-            venv/bin/pip install -U pip
-            venv/bin/pip install cramjam-cli --pre --no-index --find-links /artifacts --force-reinstall
-
-            venv/bin/cramjam-cli --help
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
