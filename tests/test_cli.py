@@ -11,11 +11,6 @@ import cramjam
 
 VARIANTS = ("snappy", "brotli", "bzip2", "lz4", "gzip", "deflate", "zstd")
 
-# TODO: after blosc2 is moved out of cramjam experimental
-if not hasattr(cramjam, "blosc2") and hasattr(cramjam, "experimental") and hasattr(cramjam.experimental, "blosc2"):
-    cramjam.blosc2 = cramjam.experimental.blosc2
-    VARIANTS = (*VARIANTS, "blosc2")
-
 # Some OS can be slow or have higher variability in their runtimes on CI
 settings.register_profile("local", deadline=timedelta(milliseconds=1000))
 settings.register_profile("CI", deadline=None, max_examples=10)
@@ -32,7 +27,6 @@ def run_command(cmd) -> bytes:
 @given(data=st.binary(min_size=1))
 @pytest.mark.parametrize("variant", VARIANTS)
 def test_cli_file_to_file(data, variant):
-
     with tempfile.TemporaryDirectory() as tmpdir:
         infile = pathlib.Path(tmpdir).joinpath("input.txt")
         infile.write_bytes(data)
@@ -48,7 +42,7 @@ def test_cli_file_to_file(data, variant):
 
         decompressed_file = pathlib.Path(tmpdir).joinpath("decompressed.txt")
         run_command(
-            f"cramjam-cli {variant} decompress --input {compressed_file} --output {decompressed_file}"
+            f"cramjam-cli {variant} decompress --input {compressed_file} --output {decompressed_file} --nbytes {len(data)}"
         )
         assert data == decompressed_file.read_bytes()
 
@@ -56,7 +50,6 @@ def test_cli_file_to_file(data, variant):
 @given(data=st.binary(min_size=1))
 @pytest.mark.parametrize("variant", VARIANTS)
 def test_cli_file_to_stdout(data, variant):
-
     with tempfile.TemporaryDirectory() as tmpdir:
         infile = pathlib.Path(tmpdir).joinpath("input.txt")
         infile.write_bytes(data)
@@ -71,6 +64,6 @@ def test_cli_file_to_stdout(data, variant):
         compressed = pathlib.Path(tmpdir).joinpath(f"compressed.txt.{variant}")
         compressed.write_bytes(expected)
 
-        cmd = f"cramjam-cli {variant} decompress --input {compressed}"
+        cmd = f"cramjam-cli {variant} decompress --input {compressed} --nbytes {len(data)}"
         out = run_command(cmd)
         assert out == data
